@@ -9,7 +9,8 @@
 namespace Src\Annotations;
 
 /**
- * @Bean
+ * @Annotation
+ * @Target({"CLASS"})
  */
 class Bean
 {

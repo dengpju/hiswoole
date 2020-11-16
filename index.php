@@ -2,23 +2,34 @@
 require 'vendor/autoload.php';
 Swoole\Runtime::enableCoroutine();
 
-
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Src\Core\BeanFactory;
 use Src\Test\MyRedis;
 use Swoole\Coroutine as Co;
+use Swoole\Http\Request;
+use Swoole\Http\Response;
 use Swoole\Runtime;
 
 Runtime::enableCoroutine();
 
 define('__ROOT__', __DIR__);
 
-//AnnotationRegistry::registerAutoloadNamespace('Src\Annotations');
-//$myRedis = new MyRedis();
-//var_dump($myRedis);
+AnnotationRegistry::registerAutoloadNamespace("Src\Annotations");
+
+//$rc=new ReflectionClass(MyRedis::class);
+//$p=$rc->getProperty("conn_url");
 //
-//$value = new \Src\Annotations\Value();
-//var_dump($value);
-//$value->do();
+//$reader = new AnnotationReader();
+//$anno=$reader->getPropertyAnnotation($p,Value::class);
+//echo $anno->name;
+
+BeanFactory::scanBeans(__DIR__.'/src/Test', 'Src\\Test');
+
+//$myredis = BeanFactory::loadClass(MyRedis::class);
+//var_dump($myredis);
+
+$myredis = BeanFactory::getBean(MyRedis::class);
+var_dump($myredis);
 
 /**
  * 请用两个线程交替输出A1B2C3D4...，A线程输出字母，B线程输出数字，要求A线程首先执行，B线程其次执行！
@@ -49,6 +60,7 @@ Co\run(function() {
 /**
  * 有一个总任务A，分解为子任务A1 A2 A3 ...，任何一个子任务失败后要快速取消所有任务。
  */
+
 Co\run(function (){
 
     for ($i = 0; $i < 3; $i++){
@@ -68,4 +80,38 @@ Co\run(function (){
         });
     }
 });
+
+
+$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+    $r->addRoute('GET', '/test', function (){
+        return 'my test';
+    });
+});
+
+$http = new Swoole\Http\Server("0.0.0.0", 81);
+$http->on('request', function (Request $request, Response$response) use ($dispatcher) {
+    $myrequest = \Src\Core\Request::init($request);
+    $routeInfo = $dispatcher->dispatch($myrequest->getMethod(), $myrequest->getUri());
+    switch ($routeInfo[0]) {
+        case FastRoute\Dispatcher::NOT_FOUND:
+            // ... 404 Not Found
+            $response->status(404);
+            $response->end();
+            break;
+        case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+            $allowedMethods = $routeInfo[1];
+            // ... 405 Method Not Allowed
+            $response->status(405);
+            $response->end();
+            break;
+        case FastRoute\Dispatcher::FOUND:
+            $handler = $routeInfo[1];
+            $vars = $routeInfo[2];
+            // ... call $handler with $vars
+            $response->end($handler());
+            break;
+    }
+});
+$http->start();
+
 

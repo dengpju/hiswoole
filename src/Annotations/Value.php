@@ -14,7 +14,9 @@ class Value
 
     public function do(){
         $ini = parse_ini_file(__ROOT__.'/.env');
-        var_dump($ini);
-        return $this->name;
+        if (isset($ini[$this->name])){
+            return $ini[$this->name];
+        }
+        return '';
     }
 }
