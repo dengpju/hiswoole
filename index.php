@@ -1,20 +1,20 @@
 <?php
-require 'vendor/autoload.php';
+$loader = require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'/app/config/define.php';
 Swoole\Runtime::enableCoroutine();
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Src\Core\BeanFactory;
-use Src\Test\MyRedis;
+use Src\Test\Redis;
 use Swoole\Coroutine as Co;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
-use Swoole\Runtime;
-
-Runtime::enableCoroutine();
 
 define('__ROOT__', __DIR__);
 
-AnnotationRegistry::registerAutoloadNamespace("Src\Annotations");
+ AnnotationRegistry::registerLoader([$loader,'loadClass']);
+
+//AnnotationRegistry::registerAutoloadNamespace("Src\Annotations");
 
 //$rc=new ReflectionClass(MyRedis::class);
 //$p=$rc->getProperty("conn_url");
@@ -23,13 +23,24 @@ AnnotationRegistry::registerAutoloadNamespace("Src\Annotations");
 //$anno=$reader->getPropertyAnnotation($p,Value::class);
 //echo $anno->name;
 
-BeanFactory::scanBeans(__DIR__.'/src/Test', 'Src\\Test');
+// BeanFactory::scanBeans(__DIR__.'/src/Test', 'Src\\Test');
 
 //$myredis = BeanFactory::loadClass(MyRedis::class);
 //var_dump($myredis);
 
-$myredis = BeanFactory::getBean(MyRedis::class);
-var_dump($myredis);
+//$redis = BeanFactory::getBean(Redis::class);
+//var_dump($redis);
+
+//$builder = new \DI\ContainerBuilder();
+//$builder->useAnnotations(true);
+//$container = $builder->build();
+//$user = $container->get(\Src\Test\User::class);
+//var_dump($user);
+
+BeanFactory::init();
+$user = BeanFactory::getBean("UserController");
+var_dump($user);
+die;
 
 /**
  * 请用两个线程交替输出A1B2C3D4...，A线程输出字母，B线程输出数字，要求A线程首先执行，B线程其次执行！

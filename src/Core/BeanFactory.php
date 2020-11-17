@@ -4,11 +4,44 @@
 namespace Src\Core;
 
 
+use DI\Container;
+use DI\ContainerBuilder;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Src\Annotations\Bean;
 
 class BeanFactory
 {
+    private static $env=[];
+    /**
+     * @var Container
+     */
+    private static $cotainer;
+
+    /**
+     * @throws \ReflectionException
+     */
+    public static function init(){
+        self::$env = parse_ini_file(ROOT_PAHT."/.env");
+        $builder = new ContainerBuilder();
+        $builder->useAnnotations(true);
+        self::$cotainer = $builder->build();
+        self::scanBeans(self::getEnv("scan_dir"), self::getEnv("scan_root_namespace"));
+    }
+
+    /**
+     * @param string $key
+     * @param string $default
+     * @return mixed|string
+     */
+    private static function getEnv(string $key, string $default=""){
+        if (isset(self::$env[$key])){
+            return self::$env[$key];
+        }
+        return $default;
+    }
+
+
     private static $beans=[];
 
     /**
@@ -17,25 +50,29 @@ class BeanFactory
      * @throws \ReflectionException
      */
     public static function scanBeans(string $path, string $namespace){
+        $register = require_once (ROOT_PAHT."/src/Annotations/Register.php");
         $phpfiles = glob($path.'/*.php');
         foreach ($phpfiles as $php){
             require_once ($php);
         }
         $classes = get_declared_classes();
         $reader = new AnnotationReader();
+//        AnnotationRegistry::registerAutoloadNamespace("Src\Annotations");
         foreach ($classes as $class){
             if (strstr($class, $namespace)){
                 $refClass = new \ReflectionClass($class);
                 $annos = $reader->getClassAnnotations($refClass);
                 foreach ($annos as $anno) {
-                    if ($anno instanceof Bean){
-                        self::$beans[$refClass->getName()] = self::loadClass($refClass->getName(),$refClass->newInstance());
+                    if (isset($register[get_class($anno)])){
+                        $handler = $register[get_class($anno)];
+                        $handler(self::$cotainer->get($refClass->getName()), self::$cotainer);
                     }
+//                    if ($anno instanceof Bean){
+//                        self::$beans[$refClass->getName()] = self::loadClass($refClass->getName(),$refClass->newInstance());
+//                    }
                 }
             }
         }
-        var_dump(self::$beans);
-        die;
     }
 
     /**
@@ -43,10 +80,7 @@ class BeanFactory
      * @return mixed|null
      */
     public static function getBean(string $beanName){
-        if (isset(self::$beans[$beanName])){
-            return self::$beans[$beanName];
-        }
-        return null;
+        return self::$cotainer->get($beanName);
     }
 
     /**
@@ -57,7 +91,6 @@ class BeanFactory
         $refClass = new \ReflectionClass($classname);
         $properties = $refClass->getProperties();
         $reader = new AnnotationReader();
-
         foreach ($properties as $property) {
             $annos = $reader->getPropertyAnnotations($property);
             foreach ($annos as $anno){
@@ -67,7 +100,7 @@ class BeanFactory
                 return $retObj;
             }
         }
-        return $object;
+        return $object ? $object:$refClass->newInstance();
     }
 
 
