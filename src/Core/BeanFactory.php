@@ -60,7 +60,6 @@ class BeanFactory
         }
         $classes = get_declared_classes();
         $reader = new AnnotationReader();
-//        AnnotationRegistry::registerAutoloadNamespace("Src\Annotations");
         foreach ($classes as $class){
             if (strstr($class, $namespace)){
                 $refClass = new \ReflectionClass($class);
@@ -70,13 +69,18 @@ class BeanFactory
                         $handler = self::$register[get_class($anno)];
                         $instance = self::$cotainer->get($refClass->getName());
                         self::handlerPropAnnot($instance,$refClass,$reader);
-                        $handler($instance, self::$cotainer);
+                        $handler($instance, self::$cotainer, $anno);
                     }
                 }
             }
         }
     }
 
+    /**
+     * @param $instance
+     * @param \ReflectionClass $refClass
+     * @param AnnotationReader $reader
+     */
     private static function handlerPropAnnot(&$instance, \ReflectionClass $refClass, AnnotationReader $reader){
         $properties = $refClass->getProperties();
         foreach ($properties as $property) {
@@ -95,26 +99,5 @@ class BeanFactory
     public static function getBean(string $beanName){
         return self::$cotainer->get($beanName);
     }
-
-    /**
-     * @param string $classname
-     * @throws \ReflectionException'
-     */
-    public static function loadClass(string $classname, $object = false){
-        $refClass = new \ReflectionClass($classname);
-        $properties = $refClass->getProperties();
-        $reader = new AnnotationReader();
-        foreach ($properties as $property) {
-            $annos = $reader->getPropertyAnnotations($property);
-            foreach ($annos as $anno){
-                $value = $anno->do();
-                $retObj = $object ? $object:$refClass->newInstance();
-                $property->setValue($retObj,$value);
-                return $retObj;
-            }
-        }
-        return $object ? $object:$refClass->newInstance();
-    }
-
 
 }

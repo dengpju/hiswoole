@@ -8,7 +8,7 @@ use Src\Annotations\Bean;
 use Src\Annotations\Value;
 
 /**
- * @Bean()
+ * @Bean(name="user")
  */
 class UserController
 {

@@ -38,7 +38,7 @@ define('__ROOT__', __DIR__);
 //var_dump($user);
 
 BeanFactory::init();
-$user = BeanFactory::getBean("UserController");
+$user = BeanFactory::getBean("user");
 var_dump($user);
 die;
 

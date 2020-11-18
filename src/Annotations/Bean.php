@@ -14,5 +14,5 @@ namespace Src\Annotations;
  */
 class Bean
 {
-
+    public $name;
 }
