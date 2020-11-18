@@ -18,6 +18,8 @@ class BeanFactory
      */
     private static $cotainer;
 
+    private static $register=[];
+
     /**
      * @throws \ReflectionException
      */
@@ -26,6 +28,7 @@ class BeanFactory
         $builder = new ContainerBuilder();
         $builder->useAnnotations(true);
         self::$cotainer = $builder->build();
+        self::$register = require_once (ROOT_PAHT."/src/Annotations/Register.php");
         self::scanBeans(self::getEnv("scan_dir"), self::getEnv("scan_root_namespace"));
     }
 
@@ -50,7 +53,7 @@ class BeanFactory
      * @throws \ReflectionException
      */
     public static function scanBeans(string $path, string $namespace){
-        $register = require_once (ROOT_PAHT."/src/Annotations/Register.php");
+
         $phpfiles = glob($path.'/*.php');
         foreach ($phpfiles as $php){
             require_once ($php);
@@ -63,14 +66,24 @@ class BeanFactory
                 $refClass = new \ReflectionClass($class);
                 $annos = $reader->getClassAnnotations($refClass);
                 foreach ($annos as $anno) {
-                    if (isset($register[get_class($anno)])){
-                        $handler = $register[get_class($anno)];
-                        $handler(self::$cotainer->get($refClass->getName()), self::$cotainer);
+                    if (isset(self::$register[get_class($anno)])){
+                        $handler = self::$register[get_class($anno)];
+                        $instance = self::$cotainer->get($refClass->getName());
+                        self::handlerPropAnnot($instance,$refClass,$reader);
+                        $handler($instance, self::$cotainer);
                     }
-//                    if ($anno instanceof Bean){
-//                        self::$beans[$refClass->getName()] = self::loadClass($refClass->getName(),$refClass->newInstance());
-//                    }
                 }
+            }
+        }
+    }
+
+    private static function handlerPropAnnot(&$instance, \ReflectionClass $refClass, AnnotationReader $reader){
+        $properties = $refClass->getProperties();
+        foreach ($properties as $property) {
+            $annos = $reader->getPropertyAnnotations($property);
+            foreach ($annos as $anno){
+                $handler = self::$register[get_class($anno)];
+                $instance = $handler($property, $instance, $anno);
             }
         }
     }
