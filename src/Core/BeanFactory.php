@@ -7,8 +7,6 @@ namespace Src\Core;
 use DI\Container;
 use DI\ContainerBuilder;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use Src\Annotations\Bean;
 
 class BeanFactory
 {
@@ -18,7 +16,7 @@ class BeanFactory
      */
     private static $cotainer;
 
-    private static $register=[];
+    private static $handler=[];
 
     /**
      * @throws \ReflectionException
@@ -28,7 +26,10 @@ class BeanFactory
         $builder = new ContainerBuilder();
         $builder->useAnnotations(true);
         self::$cotainer = $builder->build();
-        self::$register = require_once (ROOT_PAHT."/src/Annotations/Register.php");
+        $handlers = glob(ROOT_PAHT.'/src/Annotations/handler/*.php');
+        foreach ($handlers as $handler) {
+            self::$handler = array_merge(self::$handler, require_once ($handler));
+        }
         self::scanBeans(self::getEnv("scan_dir"), self::getEnv("scan_root_namespace"));
     }
 
@@ -43,9 +44,6 @@ class BeanFactory
         }
         return $default;
     }
-
-
-    private static $beans=[];
 
     /**
      * @param string $path
@@ -65,10 +63,11 @@ class BeanFactory
                 $refClass = new \ReflectionClass($class);
                 $annos = $reader->getClassAnnotations($refClass);
                 foreach ($annos as $anno) {
-                    if (isset(self::$register[get_class($anno)])){
-                        $handler = self::$register[get_class($anno)];
+                    if (isset(self::$handler[get_class($anno)])){
+                        $handler = self::$handler[get_class($anno)];
                         $instance = self::$cotainer->get($refClass->getName());
-                        self::handlerPropAnnot($instance,$refClass,$reader);
+                        self::handlerProperty($instance,$refClass,$reader);
+                        self::handlerMethod($instance,$refClass,$reader);
                         $handler($instance, self::$cotainer, $anno);
                     }
                 }
@@ -81,13 +80,29 @@ class BeanFactory
      * @param \ReflectionClass $refClass
      * @param AnnotationReader $reader
      */
-    private static function handlerPropAnnot(&$instance, \ReflectionClass $refClass, AnnotationReader $reader){
+    private static function handlerProperty(&$instance, \ReflectionClass $refClass, AnnotationReader $reader){
         $properties = $refClass->getProperties();
         foreach ($properties as $property) {
             $annos = $reader->getPropertyAnnotations($property);
             foreach ($annos as $anno){
-                $handler = self::$register[get_class($anno)];
+                $handler = self::$handler[get_class($anno)];
                 $instance = $handler($property, $instance, $anno);
+            }
+        }
+    }
+
+    /**
+     * @param $instance
+     * @param \ReflectionClass $refClass
+     * @param AnnotationReader $reader
+     */
+    private static function handlerMethod(&$instance, \ReflectionClass $refClass, AnnotationReader $reader){
+        $methods = $refClass->getMethods();
+        foreach ($methods as $method) {
+            $annos = $reader->getMethodAnnotations($method);
+            foreach ($annos as $anno){
+                $handler = self::$handler[get_class($anno)];
+                $instance = $handler($method, $instance, $anno);
             }
         }
     }

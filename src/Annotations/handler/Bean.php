@@ -1,10 +1,8 @@
 <?php
-
-
-namespace Src\Annotations;
-
+namespace Src\Annotations\handler;
 
 use DI\Container;
+use Src\Annotations\Bean;
 
 return [
     Bean::class => function($instance, Container $container,$self){
@@ -17,13 +15,5 @@ return [
         }
         $container->set($beanName,$instance);
     },
-    Value::class => function(\ReflectionProperty $property,$instance,$self){
-        $env = parse_ini_file(ROOT_PAHT.'/.env');
-        if (!isset($env[$self->name]) || $self->name==''){
-            return $instance;
-        }else{
-            $property->setValue($instance, $env[$self->name]);
-            return $instance;
-        }
-    },
 ];
+
