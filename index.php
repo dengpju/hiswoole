@@ -38,9 +38,8 @@ define('__ROOT__', __DIR__);
 //var_dump($user);
 
 BeanFactory::init();
-$user = BeanFactory::getBean("user");
+$user = BeanFactory::getBean("RouterCollector");
 var_dump($user);
-die;
 
 /**
  * 请用两个线程交替输出A1B2C3D4...，A线程输出字母，B线程输出数字，要求A线程首先执行，B线程其次执行！
@@ -93,11 +92,7 @@ Co\run(function (){
 });
 
 
-$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-    $r->addRoute('GET', '/test', function (){
-        return 'my test';
-    });
-});
+$dispatcher = BeanFactory::getBean("RouterCollector")->getDispatcher();
 
 $http = new Swoole\Http\Server("0.0.0.0", 81);
 $http->on('request', function (Request $request, Response$response) use ($dispatcher) {

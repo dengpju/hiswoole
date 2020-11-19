@@ -23,6 +23,6 @@ class UserController
      * @return string
      */
     public function test(){
-        return 'test';
+        return 'test11';
     }
 }

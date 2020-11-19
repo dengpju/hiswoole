@@ -30,7 +30,13 @@ class BeanFactory
         foreach ($handlers as $handler) {
             self::$handler = array_merge(self::$handler, require_once ($handler));
         }
-        self::scanBeans(self::getEnv("scan_dir"), self::getEnv("scan_root_namespace"));
+        $scanDirs = [
+            ROOT_PAHT.'/src/Init'=>"\Init",
+            self::getEnv("scan_dir")=>self::getEnv("scan_root_namespace"),
+        ];
+        foreach ($scanDirs as $dir => $namespace) {
+            self::scanBeans($dir, $namespace);
+        }
     }
 
     /**
@@ -51,7 +57,6 @@ class BeanFactory
      * @throws \ReflectionException
      */
     public static function scanBeans(string $path, string $namespace){
-
         $phpfiles = glob($path.'/*.php');
         foreach ($phpfiles as $php){
             require_once ($php);
