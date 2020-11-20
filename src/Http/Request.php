@@ -1,5 +1,5 @@
 <?php
-namespace Src\Core;
+namespace Src\Http;
 
 class Request
 {
@@ -84,7 +84,7 @@ class Request
      */
     public function getQueryParams()
     {
-        return $this->queryParams;
+        return $this->queryParams?$this->queryParams:[];
     }
 
     /**
@@ -100,7 +100,7 @@ class Request
      */
     public function getPostParams()
     {
-        return $this->postParams;
+        return $this->postParams?$this->postParams:[];
     }
 
     /**

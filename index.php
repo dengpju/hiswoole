@@ -96,7 +96,7 @@ $dispatcher = BeanFactory::getBean("RouterCollector")->getDispatcher();
 
 $http = new Swoole\Http\Server("0.0.0.0", 81);
 $http->on('request', function (Request $request, Response$response) use ($dispatcher) {
-    $myrequest = \Src\Core\Request::init($request);
+    $myrequest = \Src\Http\Request::init($request);
     $routeInfo = $dispatcher->dispatch($myrequest->getMethod(), $myrequest->getUri());
     switch ($routeInfo[0]) {
         case FastRoute\Dispatcher::NOT_FOUND:
@@ -113,8 +113,9 @@ $http->on('request', function (Request $request, Response$response) use ($dispat
         case FastRoute\Dispatcher::FOUND:
             $handler = $routeInfo[1];
             $vars = $routeInfo[2];
+            $extVars = [$myrequest];
             // ... call $handler with $vars
-            $response->end($handler());
+            $response->end($handler($vars, $extVars));
             break;
     }
 });
