@@ -5,7 +5,6 @@ Swoole\Runtime::enableCoroutine();
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Src\Core\BeanFactory;
-use Src\Test\Redis;
 use Swoole\Coroutine as Co;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
