@@ -1,8 +1,6 @@
 <?php
 namespace Src\Test;
 
-
-use DI\Annotation\Inject;
 use Src\Annotations\Bean;
 use Src\Annotations\Value;
 

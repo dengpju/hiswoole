@@ -20,6 +20,7 @@ class BeanFactory
 
     /**
      * @throws \ReflectionException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
      */
     public static function init(){
         self::$env = parse_ini_file(ROOT_PAHT."/.env");
@@ -55,6 +56,7 @@ class BeanFactory
      * @param string $path
      * @param string $namespace
      * @throws \ReflectionException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
      */
     public static function scanBeans(string $path, string $namespace){
         $phpfiles = glob($path.'/*.php');
