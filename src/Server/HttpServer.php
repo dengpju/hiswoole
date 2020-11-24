@@ -3,6 +3,7 @@ namespace Src\Server;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use FastRoute\Dispatcher;
 use Src\Core\BeanFactory;
+use Src\Init\HotReloadProcess;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use Swoole\Http\Server;
@@ -31,10 +32,11 @@ class HttpServer
             'worker_num' => 1,
             'daemonize' => false,
         ]);
+        $this->server->on("WorkerStart", [$this, "onWorkerStart"]);
+        $this->server->on("ManagerStart", [$this, "onManagerStart"]);
         $this->server->on('Request', [$this, "onRequest"]);
         $this->server->on("Start", [$this, "osStart"]);
         $this->server->on("ShutDown", [$this, "onShutDown"]);
-        $this->server->on("WorkerStart", [$this, "onWorkerStart"]);
     }
 
     /**
@@ -72,6 +74,7 @@ class HttpServer
      * @param Server $server
      */
     public function osStart(Server $server){
+        cli_set_process_title("hiswoole master");
         $masterPid = $server->master_pid;
         file_put_contents(__ROOT__.'/runtime/hiswoole.pid',$masterPid);
     }
@@ -89,6 +92,7 @@ class HttpServer
      * @param int $workerId
      */
     public function onWorkerStart(Server $server, int $workerId) {
+        cli_set_process_title("hiswoole worker");
         $loader = require_once __ROOT__.'/vendor/autoload.php';
         require_once __ROOT__.'/app/config/define.php';
         AnnotationRegistry::registerLoader([$loader,'loadClass']);
@@ -96,7 +100,15 @@ class HttpServer
         $this->dispatcher = BeanFactory::getBean("RouterCollector")->getDispatcher();
     }
 
+    public function onManagerStart(Server $server) {
+        cli_set_process_title("hiswoole manager");
+    }
+
     public function run(){
+        require_once __ROOT__.'/src/Init/HotReloadProcess.php';
+        echo "启动了" . PHP_EOL;
+        $p = new HotReloadProcess();
+        $this->server->addProcess($p->run());
         $this->server->start();
     }
 }
