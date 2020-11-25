@@ -38,9 +38,27 @@ class BeanFactory
             ROOT_PAHT.'/src/Init'=>"\Init",
             ROOT_PAHT.'/'.self::getEnv("scan_dir")=>self::getEnv("scan_root_namespace"),
         ];
+
         foreach ($scanDirs as $dir => $namespace) {
             self::scanBeans($dir, $namespace);
         }
+    }
+
+    /**
+     * @param string $dir
+     * @return array
+     */
+    private static function getAllFile(string $dir){
+        $dirs = glob($dir.'/*');
+        $ret = [];
+        foreach ($dirs as $dir){
+            if (is_dir($dir)){
+                $ret = array_merge($ret, self::getAllFile($dir));
+            }elseif (is_file($dir) && pathinfo($dir)["extension"]=="php"){
+                $ret[] = $dir;
+            }
+        }
+        return $ret;
     }
 
     /**
@@ -62,7 +80,7 @@ class BeanFactory
      * @throws \Doctrine\Common\Annotations\AnnotationException
      */
     public static function scanBeans(string $path, string $namespace){
-        $phpfiles = glob($path.'/*.php');
+        $phpfiles = self::getAllFile($path);
         foreach ($phpfiles as $php){
             require_once ($php);
         }

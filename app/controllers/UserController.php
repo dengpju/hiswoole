@@ -27,6 +27,6 @@ class UserController
     public function test(Request $request, Response $response,int $uid){
         var_dump($request->getQueryParams());
 //        return 'test11'.$uid;
-        return ['uid'=>$uid,'name'=>'uuu'];
+        return ['uid'=>$uid,'name'=>'uuuttt'];
     }
 }
