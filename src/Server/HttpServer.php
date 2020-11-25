@@ -1,6 +1,6 @@
 <?php
 namespace Src\Server;
-use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\AnnotationException;
 use FastRoute\Dispatcher;
 use Src\Core\BeanFactory;
 use Src\Init\HotReloadProcess;
@@ -27,7 +27,7 @@ class HttpServer
      */
     public function __construct()
     {
-        $this->server = new Server("0.0.0.0", 81);
+        $this->server = new Server("0.0.0.0", 9501);
         $this->server->set([
             'worker_num' => 1,
             'daemonize' => false,
@@ -90,22 +90,27 @@ class HttpServer
     /**
      * @param Server $server
      * @param int $workerId
+     * @throws \Exception
      */
     public function onWorkerStart(Server $server, int $workerId) {
         cli_set_process_title("hiswoole worker");
-        $loader = require_once __ROOT__.'/vendor/autoload.php';
-        require_once __ROOT__.'/app/config/define.php';
-        AnnotationRegistry::registerLoader([$loader,'loadClass']);
-        BeanFactory::init();
+        require_once __ROOT__ . '/config/define.php';
+        try {
+            BeanFactory::init();
+        } catch (AnnotationException $e) {
+        } catch (\ReflectionException $e) {
+        }
         $this->dispatcher = BeanFactory::getBean("RouterCollector")->getDispatcher();
     }
 
+    /**
+     * @param Server $server
+     */
     public function onManagerStart(Server $server) {
         cli_set_process_title("hiswoole manager");
     }
 
     public function run(){
-        require_once __ROOT__.'/src/Init/HotReloadProcess.php';
         echo "启动了" . PHP_EOL;
         $p = new HotReloadProcess();
         $this->server->addProcess($p->run());

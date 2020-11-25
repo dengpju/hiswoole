@@ -22,11 +22,11 @@ class UserController
 
     /**
      * @RequestMapping(value="/test/{uid:\d+}")
-     * @return string
+     * @return string|array
      */
     public function test(Request $request, Response $response,int $uid){
         var_dump($request->getQueryParams());
 //        return 'test11'.$uid;
-        return ['uid'=>$uid,'name'=>'fff'];
+        return ['uid'=>$uid,'name'=>'uuu'];
     }
 }

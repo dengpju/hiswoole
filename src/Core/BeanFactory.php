@@ -6,6 +6,8 @@ namespace Src\Core;
 
 use DI\Container;
 use DI\ContainerBuilder;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\Common\Annotations\AnnotationReader;
 
 class BeanFactory
@@ -21,6 +23,7 @@ class BeanFactory
     /**
      * @throws \ReflectionException
      * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Exception
      */
     public static function init(){
         self::$env = parse_ini_file(ROOT_PAHT."/.env");
@@ -33,7 +36,7 @@ class BeanFactory
         }
         $scanDirs = [
             ROOT_PAHT.'/src/Init'=>"\Init",
-            self::getEnv("scan_dir")=>self::getEnv("scan_root_namespace"),
+            ROOT_PAHT.'/'.self::getEnv("scan_dir")=>self::getEnv("scan_root_namespace"),
         ];
         foreach ($scanDirs as $dir => $namespace) {
             self::scanBeans($dir, $namespace);
@@ -72,7 +75,11 @@ class BeanFactory
                 foreach ($annos as $anno) {
                     if (isset(self::$handler[get_class($anno)])){
                         $handler = self::$handler[get_class($anno)];
-                        $instance = self::$cotainer->get($refClass->getName());
+                        try {
+                            $instance = self::$cotainer->get($refClass->getName());
+                        } catch (DependencyException $e) {
+                        } catch (NotFoundException $e) {
+                        }
                         self::handlerProperty($instance,$refClass,$reader);
                         self::handlerMethod($instance,$refClass,$reader);
                         $handler($instance, self::$cotainer, $anno);
@@ -119,7 +126,11 @@ class BeanFactory
      * @return mixed|null
      */
     public static function getBean(string $beanName){
-        return self::$cotainer->get($beanName);
+        try {
+            return self::$cotainer->get($beanName);
+        } catch (DependencyException $e) {
+        } catch (NotFoundException $e) {
+        }
     }
 
 }
