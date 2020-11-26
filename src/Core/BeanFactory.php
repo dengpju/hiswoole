@@ -26,7 +26,6 @@ class BeanFactory
      * @throws \Exception
      */
     public static function init(){
-        self::$env = parse_ini_file(ROOT_PAHT."/.env");
         $builder = new ContainerBuilder();
         $builder->useAnnotations(true);
         self::$cotainer = $builder->build();
@@ -38,10 +37,44 @@ class BeanFactory
             ROOT_PAHT.'/src/Init'=>"\Init",
             ROOT_PAHT.'/'.self::getEnv("scan_dir")=>self::getEnv("scan_root_namespace"),
         ];
-
         foreach ($scanDirs as $dir => $namespace) {
             self::scanBeans($dir, $namespace);
         }
+    }
+
+    /**
+     * 加载env
+     */
+    public static function loadEnv(){
+        self::$env = self::parseEnv(ROOT_PAHT."/.env");
+    }
+
+    /**
+     * @param string $path
+     */
+    private static function parseEnv(string $path){
+        $envs = parse_ini_file($path);
+        foreach ($envs as &$env){
+            if (strpos($env, '#') !== false){
+                $env = trim(current(explode('#', $env)));
+            }
+            if (strpos($env, ';') !== false){
+                $env = trim(current(explode(';', $env)));
+            }
+        }
+        return $envs;
+    }
+
+    /**
+     * @param string $key
+     * @param string $default
+     * @return mixed|string
+     */
+    public static function getEnv(string $key, string $default=""){
+        if (isset(self::$env[$key])){
+            return self::$env[$key];
+        }
+        return $default;
     }
 
     /**
@@ -59,18 +92,6 @@ class BeanFactory
             }
         }
         return $ret;
-    }
-
-    /**
-     * @param string $key
-     * @param string $default
-     * @return mixed|string
-     */
-    private static function getEnv(string $key, string $default=""){
-        if (isset(self::$env[$key])){
-            return self::$env[$key];
-        }
-        return $default;
     }
 
     /**

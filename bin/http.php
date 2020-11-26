@@ -9,9 +9,11 @@ error_reporting(E_ALL);
 ! defined('SWOOLE_HOOK_FLAGS') && define('SWOOLE_HOOK_FLAGS', SWOOLE_HOOK_ALL);
 
 $loader = require __ROOT__ . '/vendor/autoload.php';
+require_once __ROOT__ . '/config/define.php';
 require __ROOT__.'/src/Server/HttpServer.php';
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Src\Core\BeanFactory;
 use Src\Server\HttpServer;
 use Swoole\Process;
 use Swoole\Runtime;
@@ -22,8 +24,12 @@ AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 if ($argc=2){
     $cmd = $argv[1];
     if ($cmd=="start"){
-        $http = new HttpServer();
-        $http->run();
+        try {
+            BeanFactory::loadEnv();
+            $http = new HttpServer('0.0.0.0', BeanFactory::getEnv('PORT'));
+            $http->run();
+        } catch (Exception $e) {
+        }
     }else if ($cmd == "stop"){
         $masterPid=(int)file_get_contents(__ROOT__.'/runtime/hiswoole.pid');
         if ($masterPid && trim($masterPid) != 0){

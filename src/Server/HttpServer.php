@@ -1,6 +1,5 @@
 <?php
 namespace Src\Server;
-use Doctrine\Common\Annotations\AnnotationException;
 use FastRoute\Dispatcher;
 use Src\Core\BeanFactory;
 use Src\Init\HotReloadProcess;
@@ -24,10 +23,11 @@ class HttpServer
     /**
      * HttpServer constructor.
      * @param $server
+     * @throws \Exception
      */
-    public function __construct()
+    public function __construct(string $addr='0.0.0.0', int $port = 9501)
     {
-        $this->server = new Server("0.0.0.0", 81);
+        $this->server = new Server($addr, $port);
         $this->server->set([
             'worker_num' => 1,
             'daemonize' => false,
@@ -94,12 +94,7 @@ class HttpServer
      */
     public function onWorkerStart(Server $server, int $workerId) {
         cli_set_process_title("hiswoole worker");
-        require_once __ROOT__ . '/config/define.php';
-        try {
-            BeanFactory::init();
-        } catch (AnnotationException $e) {
-        } catch (\ReflectionException $e) {
-        }
+        BeanFactory::init();
         $this->dispatcher = BeanFactory::getBean("RouterCollector")->getDispatcher();
     }
 
