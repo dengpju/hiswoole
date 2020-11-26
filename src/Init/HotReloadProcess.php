@@ -20,7 +20,6 @@ class HotReloadProcess
         return new Process(function (Process $process){
             cli_set_process_title("hiswoole reload");
            while (true){
-               echo "hot reload process".PHP_EOL;
                sleep(3);
                $md5 = $this->getFileMd5(__ROOT__.'/app/*');
                if (!$this->md5){
@@ -30,6 +29,7 @@ class HotReloadProcess
                if ($this->md5 != $md5){
                    $this->md5 = $md5;
                    $masterPid = file_get_contents(__ROOT__.'/runtime/hiswoole.pid');
+                   echo "hot reload process".PHP_EOL;
                    Process::kill($masterPid, SIGUSR1);
                }
            }
