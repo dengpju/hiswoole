@@ -5,6 +5,7 @@ namespace App\controllers;
 
 
 use Src\Annotations\Bean;
+use Src\Annotations\Redis;
 use Src\Annotations\RequestMapping;
 use Src\Annotations\Value;
 use Src\Http\Request;
@@ -21,6 +22,7 @@ class UserController
     public $v='1.0';
 
     /**
+     * @Redis()
      * @RequestMapping(value="/test/{uid:\d+}")
      * @return string|array
      */

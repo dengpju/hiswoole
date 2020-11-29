@@ -3,6 +3,7 @@ namespace Src\Annotations\handler;
 
 use Src\Annotations\RequestMapping;
 use Src\Core\BeanFactory;
+use Src\Init\DecoratorCollector;
 
 return [
     RequestMapping::class => function(\ReflectionMethod $method, $instance, $self){
@@ -25,7 +26,10 @@ return [
                     }
                     end:
                 }
-                return $method->invokeArgs($instance,$inputParams);
+                $dCollector = BeanFactory::getBean(DecoratorCollector::class);
+                var_dump($instance);
+                return $dCollector->exec($method, $instance, $inputParams);
+                //return $method->invokeArgs($instance,$inputParams);
             });
         return $instance;
     },
