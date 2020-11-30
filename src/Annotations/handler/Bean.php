@@ -5,7 +5,7 @@ use DI\Container;
 use Src\Annotations\Bean;
 
 return [
-    Bean::class => function($instance, Container $container,$self){
+    Bean::class => function(object $instance, Container $container,$self){
         $vars=get_object_vars($self);
         if(isset($vars["name"]) && $vars["name"]!=""){
             $beanName=$vars["name"];

@@ -99,6 +99,7 @@ class BeanFactory
      * @param string $namespace
      * @throws \ReflectionException
      * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Exception
      */
     public static function scanBeans(string $path, string $namespace){
         $phpfiles = self::getAllFile($path);

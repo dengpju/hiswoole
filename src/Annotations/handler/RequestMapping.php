@@ -6,7 +6,7 @@ use Src\Core\BeanFactory;
 use Src\Init\DecoratorCollector;
 
 return [
-    RequestMapping::class => function(\ReflectionMethod $method, $instance, $self){
+    RequestMapping::class => function(\ReflectionMethod $method, object $instance, $self){
         $routerCollectr = BeanFactory::getBean('RouterCollector');
         $routerCollectr->addRoute(count($self->method)>0?$self->method:["GET"],
             $self->value, function ($parms, $extParms) use ($instance, $method){
@@ -27,7 +27,6 @@ return [
                     end:
                 }
                 $dCollector = BeanFactory::getBean(DecoratorCollector::class);
-                var_dump($instance);
                 return $dCollector->exec($method, $instance, $inputParams);
                 //return $method->invokeArgs($instance,$inputParams);
             });

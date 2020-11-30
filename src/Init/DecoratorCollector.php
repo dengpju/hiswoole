@@ -18,9 +18,7 @@ class DecoratorCollector
      * @param $inputParams
      * @return mixed
      */
-    public function exec(\ReflectionMethod $method, $instance, $inputParams){
-
-        var_dump($instance);
+    public function exec(\ReflectionMethod $method,object $instance, $inputParams){
         $key = get_class($instance).'::'.$method->getName();
         if (isset($this->dSet[$key])){
             $func = $this->dSet[$key];
