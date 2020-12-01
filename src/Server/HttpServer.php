@@ -106,6 +106,9 @@ class HttpServer
     }
 
     public function run(){
+        if (!file_exists(__RUNTIME__)){
+            mkdir(__RUNTIME__);
+        }
         echo "启动了" . PHP_EOL;
         $p = new HotReloadProcess();
         $this->server->addProcess($p->run());

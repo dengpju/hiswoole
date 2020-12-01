@@ -7,9 +7,9 @@ error_reporting(E_ALL);
 
 ! defined('__ROOT__') && define('__ROOT__', dirname(__DIR__, 1));
 ! defined('SWOOLE_HOOK_FLAGS') && define('SWOOLE_HOOK_FLAGS', SWOOLE_HOOK_ALL);
+require_once __ROOT__ . '/config/define.php';
 
 $loader = require __ROOT__ . '/vendor/autoload.php';
-require_once __ROOT__ . '/config/define.php';
 require __ROOT__.'/src/Server/HttpServer.php';
 
 use Doctrine\Common\Annotations\AnnotationRegistry;

@@ -10,5 +10,8 @@ namespace Src\Annotations;
  */
 class Redis
 {
-
+    public $source="default";
+    public $key = "";
+    public $prefix="";
+    public $type = "string";
 }

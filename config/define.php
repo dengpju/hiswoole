@@ -1,2 +1,2 @@
 <?php
-define("ROOT_PAHT", dirname(__DIR__, 1));
+define("__RUNTIME__", __ROOT__.'/runtime/');

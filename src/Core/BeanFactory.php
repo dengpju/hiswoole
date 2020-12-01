@@ -29,13 +29,13 @@ class BeanFactory
         $builder = new ContainerBuilder();
         $builder->useAnnotations(true);
         self::$cotainer = $builder->build();
-        $handlers = glob(ROOT_PAHT.'/src/Annotations/handler/*.php');
+        $handlers = glob(__ROOT__.'/src/Annotations/handler/*.php');
         foreach ($handlers as $handler) {
             self::$handler = array_merge(self::$handler, require_once ($handler));
         }
         $scanDirs = [
-            ROOT_PAHT.'/src/Init'=>"\Init",
-            ROOT_PAHT.'/'.self::getEnv("scan_dir")=>self::getEnv("scan_root_namespace"),
+            __ROOT__.'/src/Init'=>"\Init",
+            __ROOT__.'/'.self::getEnv("scan_dir")=>self::getEnv("scan_root_namespace"),
         ];
         foreach ($scanDirs as $dir => $namespace) {
             self::scanBeans($dir, $namespace);
@@ -46,7 +46,7 @@ class BeanFactory
      * 加载env
      */
     public static function loadEnv(){
-        self::$env = self::parseEnv(ROOT_PAHT."/.env");
+        self::$env = self::parseEnv(__ROOT__."/.env");
     }
 
     /**
