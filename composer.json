@@ -11,6 +11,15 @@
     "psr-4": {
       "Src\\": "src/",
       "App\\": "app/"
+    },
+    "files": [
+      "app/Functions.php"
+    ]
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://mirrors.aliyun.com/composer/"
     }
   }
 }

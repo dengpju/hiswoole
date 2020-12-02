@@ -12,12 +12,21 @@ use Doctrine\Common\Annotations\AnnotationReader;
 
 class BeanFactory
 {
+    /**
+     * @var array
+     */
     private static $env=[];
+    /**
+     * @var array
+     */
+    private static $config=[];
     /**
      * @var Container
      */
     private static $cotainer;
-
+    /**
+     * @var array
+     */
     private static $handler=[];
 
     /**
@@ -50,7 +59,20 @@ class BeanFactory
     }
 
     /**
+     * @param string $key
+     * @param string $default
+     * @return mixed|string
+     */
+    public static function getEnv(string $key, string $default=""){
+        if (isset(self::$env[$key])){
+            return self::$env[$key];
+        }
+        return $default;
+    }
+
+    /**
      * @param string $path
+     * @return array|bool
      */
     private static function parseEnv(string $path){
         $envs = parse_ini_file($path);
@@ -66,15 +88,40 @@ class BeanFactory
     }
 
     /**
+     * 加载config
+     */
+    public static function loadConfig(){
+        if (file_exists(__ROOT__."/config")){
+            $phpfiles = self::getAllFile(__ROOT__."/config");
+            foreach ($phpfiles as $php){
+                $value = require_once ($php);
+                self::$config[str_replace('.php','',basename($php))] = $value;
+            }
+            var_export(self::$config);
+        }
+    }
+
+    /**
      * @param string $key
      * @param string $default
      * @return mixed|string
      */
-    public static function getEnv(string $key, string $default=""){
-        if (isset(self::$env[$key])){
-            return self::$env[$key];
+    public static function getConfig(string $key, string $default=""){
+        $keys = array_filter(explode('.', $key));
+        $config = self::$config;
+        $value = $default;
+        foreach ($keys as $k) {
+            if (isset($config[$k])){
+                if (is_array($config[$k])){
+                    $config = $config[$k];
+                }else{
+                    $value = $config[$k];
+                }
+            }else{
+                break;
+            }
         }
-        return $default;
+        return $value;
     }
 
     /**
@@ -120,8 +167,11 @@ class BeanFactory
                         } catch (DependencyException $e) {
                         } catch (NotFoundException $e) {
                         }
+                        // 处理属性
                         self::handlerProperty($instance,$refClass,$reader);
+                        // 处理方法
                         self::handlerMethod($instance,$refClass,$reader);
+                        // 执行
                         $handler($instance, self::$cotainer, $anno);
                     }
                 }
