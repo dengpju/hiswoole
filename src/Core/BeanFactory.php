@@ -97,7 +97,6 @@ class BeanFactory
                 $value = require_once ($php);
                 self::$config[str_replace('.php','',basename($php))] = $value;
             }
-            var_export(self::$config);
         }
     }
 
@@ -110,8 +109,13 @@ class BeanFactory
         $keys = array_filter(explode('.', $key));
         $config = self::$config;
         $value = $default;
-        foreach ($keys as $k) {
+        $item = count($keys);
+        foreach ($keys as $i => $k) {
             if (isset($config[$k])){
+                if ($i == ($item - 1)){
+                    $value = $config[$k];
+                    break;
+                }
                 if (is_array($config[$k])){
                     $config = $config[$k];
                 }else{

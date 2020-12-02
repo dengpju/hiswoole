@@ -22,6 +22,6 @@ if ((!function_exists('config'))) {
      */
     function config(string $key, string $default="")
     {
-        return BeanFactory::getEnv($key, $default);
+        return BeanFactory::getConfig($key, $default);
     }
 }
