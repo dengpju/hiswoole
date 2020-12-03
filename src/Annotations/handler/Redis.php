@@ -17,12 +17,16 @@ return [
                 if ($self->key){
                     echo $self->key,PHP_EOL;
                     $fullKey = $self->prefix.$self->key;
-                    $fromRedisGet = "fromRedisGet";
+                    $config = config('redis.default');
+                    $redis = new \Redis();
+                    $redis->connect($config['host'], $config['port']);
+                    $redis->auth($config['auth']);
+                    $fromRedisGet = $redis->get($fullKey);
                     if ($fromRedisGet){
-                        return $fromRedisGet;
+                        return json_decode($fromRedisGet,true);
                     }else{
                         $result = call_user_func($func, ...$params);
-                        //TODO:: set to redis
+                        $redis->set($fullKey,json_encode($result,JSON_UNESCAPED_UNICODE));
                         return $result;
                     }
                 }
