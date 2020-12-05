@@ -28,6 +28,12 @@ class UserController
      */
     public function test(Request $request, Response $response,int $uid){
         var_dump($request->getQueryParams());
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => [190, 236],
+            'orientation' => 'L'
+        ]);
+        var_dump($mpdf);
 //        return 'test11'.$uid;
         return ['uid'=>$uid,'name'=>'uuuttt'];
     }

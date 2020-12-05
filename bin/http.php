@@ -10,7 +10,7 @@ error_reporting(E_ALL);
 require_once __ROOT__ . '/src/define.php';
 
 $loader = require __ROOT__ . '/vendor/autoload.php';
-require_once __ROOT__ . '/src/Functions/Functions.php';
+require_once __ROOT__ . '/src/Functions.php';
 require __ROOT__.'/src/Server/HttpServer.php';
 
 use Doctrine\Common\Annotations\AnnotationRegistry;

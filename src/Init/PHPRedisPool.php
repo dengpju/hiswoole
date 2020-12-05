@@ -1,7 +1,7 @@
 <?php
 namespace Src\Init;
-use Core\lib\RedisPool;
 use Src\Annotations\Bean;
+use Src\Lib\RedisPool;
 
 /**
  * Class PDOPool
@@ -15,12 +15,11 @@ class PHPRedisPool extends RedisPool{
         $poolconfig=$GLOBAL_CONFIGS["redispool"]["default"];
         parent::__construct($poolconfig['min'], $poolconfig['max'],$poolconfig['idleTime']);
     }
+
     protected function newRedis()
     {
         global $GLOBAL_CONFIGS;
         $default=$GLOBAL_CONFIGS["redis"]["default"];
-
-
         $redis=new \Redis();
         $redis->connect($default["host"],$default["port"]);
         if($default["auth"]!="")

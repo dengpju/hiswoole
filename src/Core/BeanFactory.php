@@ -217,7 +217,7 @@ class BeanFactory
 
     /**
      * @param string $beanName
-     * @return mixed|null
+     * @return mixed Entry
      */
     public static function getBean(string $beanName){
         try {

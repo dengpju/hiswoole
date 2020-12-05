@@ -3,6 +3,7 @@ namespace Src\Init;
 
 use Illuminate\Database\Capsule\Manager as lvdb;
 use Src\Annotations\Bean;
+use Src\Core\BeanFactory;
 
 /**
  * @Bean
@@ -32,6 +33,12 @@ class MyDB{
     {
         $this->dbSource = $dbSource;
     }
+
+    /**
+     * MyDB constructor.
+     * @param bool $db_obj
+     * @throws \Throwable
+     */
     public function __construct($db_obj=false)
     {
         global $GLOBAL_CONFIGS;
