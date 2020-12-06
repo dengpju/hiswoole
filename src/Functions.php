@@ -2,13 +2,13 @@
 
 use Src\Core\BeanFactory;
 
-if ((!function_exists('env'))) {
+if ((!function_exists('_env'))) {
     /**
      * @param string $key
      * @param string $default
      * @return mixed|string
      */
-    function env(string $key, string $default="")
+    function _env(string $key, string $default="")
     {
         return BeanFactory::getEnv($key, $default);
     }

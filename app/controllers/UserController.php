@@ -22,18 +22,12 @@ class UserController
     public $v='1.0';
 
     /**
-     * @Redis(key="users", prefix="test")
+     * @Redis(key="#2", prefix="users",expire="60")
      * @RequestMapping(value="/test/{uid:\d+}")
      * @return string|array
      */
     public function test(Request $request, Response $response,int $uid){
         var_dump($request->getQueryParams());
-        $mpdf = new \Mpdf\Mpdf([
-            'mode' => 'utf-8',
-            'format' => [190, 236],
-            'orientation' => 'L'
-        ]);
-        var_dump($mpdf);
 //        return 'test11'.$uid;
         return ['uid'=>$uid,'name'=>'uuuttt'];
     }
