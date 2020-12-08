@@ -16,6 +16,16 @@ function getKey(string $key, array $params){
     return $key;
 }
 
+function getKeyFromData($key, array $arr){
+    $pattern = "/^#(\w+)/i";
+    if (preg_match($pattern, $key, $matches)){
+        if (isset($arr[$matches[1]])){
+            return $arr[$matches[1]];
+        }
+    }
+    return $key;
+}
+
 function redisByString(Redis $self, array $params, $func){
     $fullKey = $self->prefix.getKey($self->key, $params);
     $config = config('redis.default');
@@ -44,15 +54,21 @@ function redisByHash(Redis $self, array $params, $func){
     $redis->auth($config['auth']);
     $fromRedisGet = $redis->hGetAll($fullKey);
     if ($fromRedisGet){
+        if ($self->incr != ""){
+            $redis->hIncrBy($fullKey, $self->incr, 1);
+        }
         return $fromRedisGet;
     }else{
         $result = call_user_func($func, ...$params);
         if (is_object($result)){
             $result = json_decode(json_encode($result), true);
         }
-        if ($self->expire > 0){
-            $redis->hMSet($fullKey, $result);
-        }else{
+        $dataKeys = implode("", array_keys($result));
+        if (preg_match("/^\d+$/", $dataKeys)){
+            foreach ($result as $data) {
+                $redis->hMSet($self->prefix . getKeyFromData($self->key, $data), $data);
+            }
+        } else {
             $redis->hMSet($fullKey, $result);
         }
         return $result;
@@ -70,7 +86,7 @@ return [
                         case "string":
                             return redisByString($self, $params, $func);
                         case "hash":
-                            return redisByString($self, $params, $func);
+                            return redisByHash($self, $params, $func);
                         default:
                             return call_user_func($func, ...$params);
                     }

@@ -22,7 +22,7 @@ class UserController
     public $v='1.0';
 
     /**
-     * @Redis(key="#2", prefix="users",expire="60",type="hash")
+     * @Redis(key="#2", prefix="users",expire="60",type="hash",incr="count")
      * @RequestMapping(value="/test/{uid:\d+}")
      * @return string|array
      */

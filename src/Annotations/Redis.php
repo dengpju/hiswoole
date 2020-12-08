@@ -15,4 +15,5 @@ class Redis
     public $prefix="";
     public $type = "string";
     public $expire=0;
+    public $incr="";
 }
