@@ -16,4 +16,7 @@ class Redis
     public $type = "string";
     public $expire=0;
     public $incr="";
+    public $score="";
+    public $member="";
+    public $coroutine=false;
 }

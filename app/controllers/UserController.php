@@ -10,6 +10,9 @@ use Src\Annotations\RequestMapping;
 use Src\Annotations\Value;
 use Src\Http\Request;
 use Src\Http\Response;
+use Swoole\Coroutine;
+use Swoole\Coroutine\Channel;
+use function Swoole\Coroutine\run;
 
 /**
  * @Bean(name="user")
@@ -30,5 +33,32 @@ class UserController
         var_dump($request->getQueryParams());
 //        return 'test11'.$uid;
         return ['uid'=>$uid,'name'=>'uuuttt'];
+    }
+
+    /**
+     * @Redis(prefix="stock",key="prod_id",member="prod",score="prod_stock",type="sortedset",coroutine=true)
+     * @RequestMapping(value="/tests")
+     * @param Request $request
+     * @param Response $response
+     */
+    public function tests(Request $request, Response $response){
+        $chan = new Channel(1);
+//        Coroutine\run(function () {
+//            $chan = new Channel(1);
+//            Coroutine::create(function () use ($chan) {
+//                $prods = [
+//                    ["prod_id"=>12,"stock"=>32],
+//                    ["prod_id"=>13,"stock"=>32],
+//                ];
+//                $chan->push($prods);
+//            });
+//            return $chan;
+//        });
+        $prods = [
+                    ["prod_id"=>12,"prod_stock"=>32],
+                    ["prod_id"=>13,"prod_stock"=>32],
+                ];
+        $chan->push($prods);
+        return $chan;
     }
 }

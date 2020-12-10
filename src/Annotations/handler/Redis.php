@@ -7,6 +7,7 @@ namespace Src\Annotations\handler;
 use Src\Annotations\Redis;
 use Src\Core\BeanFactory;
 use Src\Init\DecoratorCollector;
+use Swoole\Coroutine\Channel;
 
 function getKey(string $key, array $params){
     $pattern = "/^#(\d+)/i";
@@ -75,6 +76,36 @@ function redisByHash(Redis $self, array $params, $func){
     }
 }
 
+function redisBySortedSet(Redis $self, array $params, $func){
+    $config = config('redis.default');
+    $redis = new \Redis();
+    $redis->connect($config['host'], $config['port']);
+    $redis->auth($config['auth']);
+
+    if ($self->coroutine){
+        /**
+         * @var Channel $chan
+         */
+        $chan = call_user_func($func, ...$params);
+        $result = $chan->pop(5);
+        if (!$result){
+            return ["result"=>"error"];
+        }
+    }else{
+        $result = call_user_func($func, ...$params);
+    }
+    if (is_object($result)){
+        $result = json_decode(json_encode($result), true);
+    }
+    var_dump($result);
+    var_export($self);
+    foreach ($result as $data) {
+        var_dump($data);
+        $redis->zAdd($self->prefix, $data[$self->score],$self->member.$data[$self->key]);
+    }
+    return ["result"=>"success"];
+}
+
 return [
     Redis::class => function(\ReflectionMethod $method, object $instance , Redis $self){
         $dCollector = BeanFactory::getBean(DecoratorCollector::class);
@@ -87,6 +118,8 @@ return [
                             return redisByString($self, $params, $func);
                         case "hash":
                             return redisByHash($self, $params, $func);
+                        case "sortedset":
+                            return redisBySortedSet($self, $params, $func);
                         default:
                             return call_user_func($func, ...$params);
                     }
