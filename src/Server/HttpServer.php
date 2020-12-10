@@ -31,6 +31,7 @@ class HttpServer
         $this->server->set([
             'worker_num' => 1,
             'daemonize' => false,
+            'max_coroutine' => 100,
         ]);
         $this->server->on("WorkerStart", [$this, "onWorkerStart"]);
         $this->server->on("ManagerStart", [$this, "onManagerStart"]);

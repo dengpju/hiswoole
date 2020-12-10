@@ -43,22 +43,20 @@ class UserController
      */
     public function tests(Request $request, Response $response){
         $chan = new Channel(1);
-//        Coroutine\run(function () {
-//            $chan = new Channel(1);
-//            Coroutine::create(function () use ($chan) {
-//                $prods = [
-//                    ["prod_id"=>12,"stock"=>32],
-//                    ["prod_id"=>13,"stock"=>32],
+
+        Coroutine::create(function () use ($chan) {
+            $prods = [
+                ["prod_id"=>12,"prod_stock"=>32],
+                ["prod_id"=>13,"prod_stock"=>32],
+            ];
+            $chan->push($prods);
+        });
+
+//        $prods = [
+//                    ["prod_id"=>12,"prod_stock"=>32],
+//                    ["prod_id"=>13,"prod_stock"=>32],
 //                ];
-//                $chan->push($prods);
-//            });
-//            return $chan;
-//        });
-        $prods = [
-                    ["prod_id"=>12,"prod_stock"=>32],
-                    ["prod_id"=>13,"prod_stock"=>32],
-                ];
-        $chan->push($prods);
+//        $chan->push($prods);
         return $chan;
     }
 }
