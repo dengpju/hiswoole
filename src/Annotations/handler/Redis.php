@@ -7,6 +7,7 @@ namespace Src\Annotations\handler;
 use Src\Annotations\Redis;
 use Src\Core\BeanFactory;
 use Src\Init\DecoratorCollector;
+use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 
 function getKey(string $key, array $params){
@@ -87,8 +88,12 @@ function redisBySortedSet(Redis $self, array $params, $func){
          * @var Channel $chan
          */
         $chan = call_user_func($func, ...$params);
-        $result = $chan->pop(5);
-        if (!$result){
+        $length = $chan->length();
+        $result= [];
+        while ($chan->length()){
+            $result = array_merge($result, $chan->pop(5));
+        }
+        if (!$length){
             return ["result"=>"error"];
         }
     }else{
@@ -97,10 +102,7 @@ function redisBySortedSet(Redis $self, array $params, $func){
     if (is_object($result)){
         $result = json_decode(json_encode($result), true);
     }
-    var_dump($result);
-    var_export($self);
     foreach ($result as $data) {
-        var_dump($data);
         $redis->zAdd($self->prefix, $data[$self->score],$self->member.$data[$self->key]);
     }
     return ["result"=>"success"];
