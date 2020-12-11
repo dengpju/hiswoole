@@ -19,4 +19,5 @@ class Redis
     public $score="";
     public $member="";
     public $coroutine=false;
+    public $script="";
 }

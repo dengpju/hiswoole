@@ -7,7 +7,6 @@ namespace Src\Annotations\handler;
 use Src\Annotations\Redis;
 use Src\Core\BeanFactory;
 use Src\Init\DecoratorCollector;
-use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 
 function getKey(string $key, array $params){
@@ -108,12 +107,23 @@ function redisBySortedSet(Redis $self, array $params, $func){
     return ["result"=>"success"];
 }
 
+function redisByLua(Redis $self, array $params, $func){
+    $config = config('redis.default');
+    $redis = new \Redis();
+    $redis->connect($config['host'], $config['port']);
+    $redis->auth($config['auth']);
+    return $redis->eval($self->script);
+}
+
 return [
     Redis::class => function(\ReflectionMethod $method, object $instance , Redis $self){
         $dCollector = BeanFactory::getBean(DecoratorCollector::class);
         $key = get_class($instance).'::'.$method->getName();
         $dCollector->dSet[$key] = function ($func) use ($self) {
             return function (array $params) use ($func,$self) {
+                if ($self->script != ""){
+                    return redisByLua($self, $params, $func);
+                }
                 if ("" != $self->key){
                     switch ($self->type) {
                         case "string":

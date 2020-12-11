@@ -5,6 +5,7 @@ namespace App\controllers;
 
 
 use Src\Annotations\Bean;
+use Src\Annotations\Lock;
 use Src\Annotations\Redis;
 use Src\Annotations\RequestMapping;
 use Src\Annotations\Value;
@@ -74,5 +75,23 @@ class UserController
 //                ];
 //        $chan->push($prods);
         return $chan;
+    }
+
+    /**
+     * @Redis(script="
+          return redis.call('get','name');
+         ")
+     * @RequestMapping(value="/testscript")
+     */
+    public function testscript() {
+
+    }
+
+    /**
+     * @Lock(prefix=""lockprod", key="#0",retry="2")
+     * @RequestMapping(value="/testlock")
+     */
+    public function testlock(int $pid) {
+
     }
 }
